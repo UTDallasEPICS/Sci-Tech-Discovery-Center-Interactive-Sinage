@@ -4,25 +4,24 @@ import time
 GPIO.setmode(GPIO.BCM)
 # Define GPIO pins for three buttons
 BUTTON_CONFIG = {
-    # Format: 'ButtonName': (BCM_Pin, Output_Char)
+    # Format: 'ButtonName': (GPIOPin, Output_Char)
     'Button1': (17, 'A'), 
     'Button2': (27, 'B'), 
     'Button3': (22, 'C')
 }
 
-# Dictionary to track the previous state for each button (using pin number as key)
+# Dictionary to track the previous state for each button 
 previous_states = {}
 
 # Setup GPIO pins as input with pull-down resistor
-for name, (pin,code) in BUTTON_CONFIG.items():
+for name, (pin, code) in BUTTON_CONFIG.items():
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     # Setting starting state to be LOW
     previous_states[pin] = GPIO.LOW
 
-    try:
-        while True:
-            for name, (pin, char) in BUTTON_CONFIG.items():
-                
+try:
+    while True:
+        for name, (pin, char) in BUTTON_CONFIG.items():
                 # Read current state and updates dictionary
                 current_state = GPIO.input(pin)
                 previous_state = previous_states[pin]
@@ -39,8 +38,9 @@ for name, (pin,code) in BUTTON_CONFIG.items():
                 previous_states[pin] = current_state
 
             time.sleep(0.01)
-
-    except KeyboardInterrupt:
-        print("\nExiting program...")
-    finally:
+except KeyboardInterrupt:
+    print("\nExiting program...")
+except Exception as e:
+    print(f"An error occurred: {e}")
+finally:
         GPIO.cleanup()
