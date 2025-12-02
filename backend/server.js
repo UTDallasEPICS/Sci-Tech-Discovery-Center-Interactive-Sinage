@@ -2,8 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-app.use(cors()); // Allows your React app (port 5173) to talk to this server (port 8000)
-
+app.use(cors()); 
 let clients = [];
 
 // 1. The SSE Endpoint (This is what your React App connects to)
