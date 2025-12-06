@@ -9,7 +9,7 @@ BUTTON_RECEIVED_ONCE = False    # Flag to track if a button has been received
 ID_RECEIVED_ONCE = False        # Flag to track if a denary ID has been received 
 CURRENT_DEN_ID = None           # Placeholder for the current denary ID
 CURRENT_BUTTON = None           # Placeholder for the current button state
-TIMEOUT_SECONDS = 15            # Timeout duration in seconds
+TIMEOUT_SECONDS = 15             # Timeout duration in seconds
 
 # SSE event queue and timer
 event_queue = queue.Queue()
@@ -27,7 +27,7 @@ def trigger_timeout():
     
     default_language = CURRENT_BUTTON
     # Send auto-timeout button press event
-    event_queue.put({"type": "button_press_timeout", "language": default_language, "screen": "button-press-timeout"})
+    event_queue.put({"type": "button_press_timeout", "language": default_language})
 
 
 #Endpoint to show info based on current denary ID and button
@@ -45,6 +45,7 @@ def showinfo(request):
     data = getpath(CURRENT_DEN_ID, CURRENT_BUTTON)
 
     status = 404 if "error" in data else 200
+    
     return JsonResponse(data, status=status)
 
 
@@ -72,7 +73,7 @@ def receive_den_id(request):
     ID_RECEIVED_ONCE = True
     
     # Send scanned_id event immediately
-    event_queue.put({"type": "scanned_id", "id": denary_id, "screen": "language-screen"})
+    event_queue.put({"type": "scanned_id", "path": data["video_path"]})
 
     # Cancel any existing timer
     if active_timer and active_timer.is_alive():
@@ -123,7 +124,7 @@ def receive_button_press(request):
     BUTTON_RECEIVED_ONCE = True
     
     # Send button_press event to Frontend
-    event_queue.put({"type": "button_press", "language": language, "screen": "video-screen"})
+    event_queue.put({"type": "button_press", "language": language})
 
 
     return JsonResponse({"OK": f"Button press validated and stored. Language set to {CURRENT_BUTTON}"}, status=200)
@@ -134,7 +135,7 @@ def receive_button_press(request):
 def restartflag(request):
     global BUTTON_RECEIVED_ONCE, ID_RECEIVED_ONCE, CURRENT_BUTTON, CURRENT_DEN_ID, active_timer
 
-    # Cancel any active timer ; good house-keeping practice
+    # Cancel any active timer ; good for house keeping
     if active_timer and active_timer.is_alive():
         active_timer.cancel()
 
@@ -155,13 +156,13 @@ def sse_events(request):
             try:
                 event = event_queue.get(timeout=30)
                 if event["type"] == "scanned_id":
-                    yield f'event: scanned_id\ndata: {{"id": "{event["id"]}", "screen": "{event["screen"]}"}}\n\n'
+                    yield f'event: scanned_id\ndata: {{"path": "{event["path"]}"}}\n\n'
                 elif event["type"] == "button_press_timeout":
                     #for timeout button press
-                    yield f'event: button_press_timeout\ndata: {{ "language": "{event["language"]}", "screen": "{event["screen"]}"}}\n\n'
+                    yield f'event: button_press_timeout\ndata: {{ "language": "{event["language"]}"}}\n\n'
                 elif event["type"] == "button_press":
                     #for normal button press
-                    yield f'event: button_press\ndata: {{ "language": "{event["language"]}", "screen": "{event["screen"]}"}}\n\n'
+                    yield f'event: button_press\ndata: {{ "language": "{event["language"]}"}}\n\n'
             except queue.Empty:
                 # Send heartbeat to keep connection alive
                 yield "data: heartbeat\n\n"
