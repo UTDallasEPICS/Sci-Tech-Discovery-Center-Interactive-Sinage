@@ -145,13 +145,7 @@ Important:** Do not type `sudo` before `./setup.sh`. The installer handles that 
 
 ### Step 5 — Connect the Physical Buttons and Scanner
 
-
-
-		placeholder 
-
-
-
-
+Refer to Sci-Tech Wiring Guide.pdf for instructions on proper wiring connections to set up the system.
 
 ---
 
@@ -211,6 +205,8 @@ If the kiosk doesn't start automatically after a power cycle, you can check what
 ## Swapping or Adding Videos
 
 The easiest way to manage videos is the [NFC Tag Manager app](#nfc-tag-manager--full-guide) — see the next section. It handles file copying, naming, and registration automatically. The instructions below are for manually replacing video files outside of the app.
+
+**Note: For optimal performance, use a video with H.265 encoding at or below a resolution of 1920x1080 and a bit rate of 7 Mbps.**
 
 ### Where the videos live
 
