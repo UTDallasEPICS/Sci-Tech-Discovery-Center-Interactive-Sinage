@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Launch NFC Manager
+Comment=Start the NFC tag manager
+Exec=/bin/sh -c 'cd "$(dirname "$1")/nfc_manager" && ./launch.sh; status=$?; echo; printf "Press Enter to close..."; read _; exit "$status"' launcher %k
+Terminal=true
+Categories=Utility;

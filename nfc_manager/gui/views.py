@@ -2,77 +2,129 @@ import customtkinter as ctk
 from typing import Callable
 
 
-class ManageTagsView(ctk.CTkFrame):
+class ExhibitsView(ctk.CTkFrame):
     """View to list and manage all existing exhibit tags."""
 
     def __init__(self, master, data_manager, on_edit_callback: Callable[[dict], None], **kwargs):
-        super().__init__(master, **kwargs)
+        super().__init__(master, fg_color="transparent", **kwargs)
         self.data_manager = data_manager
         self.on_edit_callback = on_edit_callback
 
-        # Header
-        self.header_label = ctk.CTkLabel(self, text="Manage Exhibits", font=ctk.CTkFont(family="League Spartan", size=28, weight="bold"))
-        self.header_label.pack(pady=(20, 10), padx=20, anchor="w")
+        # Header row
+        header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        header_frame.pack(fill="x", padx=28, pady=(24, 4))
 
-        # Scrollable Frame for the list
-        self.scroll_frame = ctk.CTkScrollableFrame(self)
-        self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=10)
+        ctk.CTkLabel(
+            header_frame, text="Manage Tags",
+            font=ctk.CTkFont(family="League Spartan", size=28, weight="bold")
+        ).pack(side="left")
+
+        # Scrollable list
+        self.scroll_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.scroll_frame.pack(fill="both", expand=True, padx=24, pady=(8, 20))
 
         self.refresh_list()
 
     def refresh_list(self):
-        """Re-render the list of tags."""
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
         tags = self.data_manager.get_all_tags()
 
         if not tags:
-            empty_label = ctk.CTkLabel(self.scroll_frame, text="No exhibits configured. Scan a tag to add one.",
-                                       font=ctk.CTkFont(family="Open Sans Light", size=14), text_color="gray")
-            empty_label.pack(pady=40)
+            ctk.CTkLabel(
+                self.scroll_frame,
+                text="No tags configured.\nScan a tag to add one.",
+                font=ctk.CTkFont(family="Open Sans", size=14),
+                text_color="gray"
+            ).pack(pady=60)
             return
 
         for tag in tags:
             self._create_tag_row(tag)
 
     def _create_tag_row(self, tag: dict):
-        """Create a UI row for a single exhibit tag."""
-        row = ctk.CTkFrame(self.scroll_frame)
-        row.pack(fill="x", pady=5)
+        row = ctk.CTkFrame(self.scroll_frame, corner_radius=10)
+        row.pack(fill="x", pady=4, padx=4)
+
+        # Accent bar on the left
+        accent = ctk.CTkFrame(row, width=5, corner_radius=3, fg_color="#73008f")
+        accent.pack(side="left", fill="y", padx=(6, 0), pady=8)
 
         # Info
-        info_frame = ctk.CTkFrame(row, fg_color="transparent")
-        info_frame.pack(side="left", padx=10, pady=10, fill="x", expand=True)
+        info = ctk.CTkFrame(row, fg_color="transparent")
+        info.pack(side="left", padx=12, pady=10, fill="x", expand=True)
 
-        name_label = ctk.CTkLabel(info_frame, text=tag.get('name', 'Unknown'),
-                                  font=ctk.CTkFont(family="League Spartan", size=18, weight="bold"))
-        name_label.pack(anchor="w")
+        ctk.CTkLabel(
+            info, text=tag.get("name", "Unknown"),
+            font=ctk.CTkFont(family="League Spartan", size=17, weight="bold")
+        ).pack(anchor="w")
 
-        uid_label = ctk.CTkLabel(info_frame, text=f"UID: {tag.get('uid')}",
-                                 font=ctk.CTkFont(family="Open Sans Light", size=12), text_color="gray")
-        uid_label.pack(anchor="w")
+        ctk.CTkLabel(
+            info, text=f"UID: {tag.get('uid')}",
+            font=ctk.CTkFont(family="Open Sans", size=11), text_color="gray"
+        ).pack(anchor="w")
 
-        # Show which languages have videos
         path_dict = tag.get("path", {})
-        langs = ", ".join(sorted(path_dict.keys())) if path_dict else "none"
-        lang_label = ctk.CTkLabel(info_frame, text=f"Videos: {langs}",
-                                  font=ctk.CTkFont(family="Open Sans Light", size=12), text_color="gray")
-        lang_label.pack(anchor="w")
+        lang_labels = dict(self.data_manager.get_languages())
+        langs = ", ".join(lang_labels.get(k, k) for k in sorted(path_dict.keys())) if path_dict else "none"
+        ctk.CTkLabel(
+            info, text=f"Videos: {langs}",
+            font=ctk.CTkFont(family="Open Sans", size=11), text_color="gray"
+        ).pack(anchor="w")
 
-        # Actions
-        edit_btn = ctk.CTkButton(row, text="Edit", width=60,
-                                 font=ctk.CTkFont(family="League Spartan", size=14, weight="bold"),
-                                 command=lambda t=tag: self.on_edit_callback(t))
-        edit_btn.pack(side="right", padx=5)
+        # Action buttons
+        btn_frame = ctk.CTkFrame(row, fg_color="transparent")
+        btn_frame.pack(side="right", padx=12, pady=10)
 
-        delete_btn = ctk.CTkButton(row, text="Delete", width=60,
-                                   font=ctk.CTkFont(family="League Spartan", size=14, weight="bold"),
-                                   fg_color="#e53935", hover_color="#b71c1c",
-                                   command=lambda u=tag['uid']: self._confirm_delete(u))
-        delete_btn.pack(side="right", padx=10)
+        ctk.CTkButton(
+            btn_frame, text="Edit", width=64, height=30,
+            font=ctk.CTkFont(family="League Spartan", size=13, weight="bold"),
+            command=lambda t=tag: self.on_edit_callback(t)
+        ).pack(pady=2)
+
+        ctk.CTkButton(
+            btn_frame, text="Delete", width=64, height=30,
+            font=ctk.CTkFont(family="League Spartan", size=13, weight="bold"),
+            fg_color="#e53935", hover_color="#b71c1c",
+            command=lambda u=tag["uid"]: self._confirm_delete(u)
+        ).pack(pady=2)
 
     def _confirm_delete(self, uid: str):
-        """Delete tag and refresh list."""
-        self.data_manager.delete_tag(uid)
-        self.refresh_list()
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Confirm Delete")
+        dialog.geometry("340x150")
+        dialog.transient(self.winfo_toplevel())
+        dialog.grab_set()
+        dialog.resizable(False, False)
+
+        ctk.CTkLabel(
+            dialog, text="Delete this tag?",
+            font=ctk.CTkFont(family="League Spartan", size=18, weight="bold")
+        ).pack(pady=(20, 6))
+        ctk.CTkLabel(
+            dialog, text="This will also remove its video files.",
+            font=ctk.CTkFont(family="Open Sans", size=12), text_color="gray"
+        ).pack()
+
+        btn_row = ctk.CTkFrame(dialog, fg_color="transparent")
+        btn_row.pack(pady=16)
+
+        ctk.CTkButton(
+            btn_row, text="Cancel", width=100, height=32,
+            fg_color="gray50", hover_color="gray40",
+            font=ctk.CTkFont(family="League Spartan", size=13, weight="bold"),
+            command=dialog.destroy
+        ).pack(side="left", padx=8)
+
+        def do_delete():
+            self.data_manager.delete_tag(uid)
+            dialog.destroy()
+            self.refresh_list()
+
+        ctk.CTkButton(
+            btn_row, text="Delete", width=100, height=32,
+            fg_color="#e53935", hover_color="#b71c1c",
+            font=ctk.CTkFont(family="League Spartan", size=13, weight="bold"),
+            command=do_delete
+        ).pack(side="left", padx=8)

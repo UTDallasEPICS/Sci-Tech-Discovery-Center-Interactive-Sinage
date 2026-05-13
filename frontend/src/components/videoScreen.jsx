@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { useEffect, useState } from "react";
-=======
 import { useEffect, useState, useRef } from "react";
->>>>>>> 41d1071 (Final version from Pi)
 import { useNavigate } from "react-router-dom";
 
 export default function VideoScreen() {
@@ -34,13 +30,14 @@ export default function VideoScreen() {
       .catch((err) => console.error("ShowInfo fetch failed:", err.message));
   }, []);
 
-  useEffect (() => {
+  useEffect(() => {
     const video = videoRef.current;
     const progressBar = progressRef.current;
 
     if (!video || !progressBar) return;
 
     const updateProgress = () => {
+      if (!video.duration) return;
       const percent = (video.currentTime / video.duration) * 100;
       progressBar.style.width = percent + "%";
     };
@@ -75,10 +72,7 @@ export default function VideoScreen() {
         autoPlay
         onEnded={handleVideoEnd}
         playsInline
-<<<<<<< HEAD
-=======
         ref={videoRef}
->>>>>>> 41d1071 (Final version from Pi)
         className="w-full h-full rounded-2xl shadow-lg object-cover"
       />
 

@@ -34,15 +34,15 @@ fi
 
 # --- System packages ---
 
-echo -e "${YELLOW}[1/5] Installing system packages...${NC}"
+echo -e "${YELLOW}[1/6] Installing system packages...${NC}"
 sudo apt update -qq
-sudo apt install -y python3-venv python3-pip nodejs npm git
+sudo apt install -y python3-venv python3-pip python3-tk nodejs npm git
 echo -e "${GREEN}  Done.${NC}"
 echo ""
 
 # --- Backend ---
 
-echo -e "${YELLOW}[2/5] Setting up Django backend...${NC}"
+echo -e "${YELLOW}[2/6] Setting up Django backend...${NC}"
 cd "$PROJECT_DIR/interactive-signage-backend"
 
 if [ ! -d "venv" ]; then
@@ -66,7 +66,7 @@ echo ""
 
 # --- Hardware Layer ---
 
-echo -e "${YELLOW}[3/5] Setting up hardware layer...${NC}"
+echo -e "${YELLOW}[3/6] Setting up hardware layer...${NC}"
 cd "$PROJECT_DIR/Hardware_Layer"
 
 if [ ! -d "venv" ]; then
@@ -80,7 +80,7 @@ echo ""
 
 # --- Frontend ---
 
-echo -e "${YELLOW}[4/5] Building frontend (this may take a few minutes on the Pi)...${NC}"
+echo -e "${YELLOW}[4/6] Building frontend (this may take a few minutes on the Pi)...${NC}"
 cd "$PROJECT_DIR/frontend"
 
 npm install --loglevel=error
@@ -88,9 +88,21 @@ npx vite build
 echo -e "${GREEN}  Frontend built.${NC}"
 echo ""
 
+# --- NFC Manager ---
+
+echo -e "${YELLOW}[5/6] Setting up NFC manager...${NC}"
+if [ -f "$PROJECT_DIR/nfc_manager/setup.sh" ]; then
+    cd "$PROJECT_DIR/nfc_manager"
+    bash setup.sh
+    echo -e "${GREEN}  NFC manager ready.${NC}"
+else
+    echo -e "${YELLOW}  NFC manager setup script not found; skipping.${NC}"
+fi
+echo ""
+
 # --- SPI check ---
 
-echo -e "${YELLOW}[5/5] Checking SPI interface...${NC}"
+echo -e "${YELLOW}[6/6] Checking SPI interface...${NC}"
 if [ -e "/dev/spidev0.0" ]; then
     echo -e "${GREEN}  SPI is enabled.${NC}"
 else

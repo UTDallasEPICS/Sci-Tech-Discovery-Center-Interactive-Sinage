@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Setup NFC Manager
+Comment=Install NFC manager dependencies
+Exec=/bin/sh -c 'cd "$(dirname "$1")/nfc_manager" && ./setup.sh; status=$?; echo; printf "Press Enter to close..."; read _; exit "$status"' launcher %k
+Terminal=true
+Categories=Utility;

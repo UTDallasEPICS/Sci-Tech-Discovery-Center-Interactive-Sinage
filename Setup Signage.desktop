@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Setup Signage
+Comment=Install dependencies and build the signage kiosk
+Exec=/bin/sh -c 'cd "$(dirname "$1")" && ./setup.sh; status=$?; echo; printf "Press Enter to close..."; read _; exit "$status"' launcher %k
+Terminal=true
+Categories=Utility;

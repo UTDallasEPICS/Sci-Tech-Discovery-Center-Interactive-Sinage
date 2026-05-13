@@ -1,5 +1,5 @@
 {
-    "signage_project_path": "../Sci-Tech-Discovery-Center-Interactive-Signage",
+    "signage_project_path": "..",
     "languages": ["en", "es", "te"],
     "language_labels": {
         "en": "English",
